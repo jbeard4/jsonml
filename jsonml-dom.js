@@ -14,6 +14,17 @@ var JsonML = JsonML || {};
 (function(JsonML){
 	'use strict';
 
+    //small compatibility layer for rhino
+    var isRhino = typeof Packages !== "undefined";
+
+    var item = isRhino ? 
+        function(nodeList,index){
+            return nodeList.item(index);
+        } : 
+        function(nodeList,index){
+            return nodeList[index];
+        };
+
 	/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
 		if (!elem || !elem.nodeType) {
 			// free references
@@ -23,7 +34,7 @@ var JsonML = JsonML || {};
 		function addChildren(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
 			if (elem.hasChildNodes()) {
 				for (var i=0; i<elem.childNodes.length; i++) {
-					var child = elem.childNodes[i];
+					var child = item(elem.childNodes,i);
 					child = JsonML.parseDOM(child, filter);
 					if (child) {
 						jml.push(child);
@@ -46,11 +57,12 @@ var JsonML = JsonML || {};
 					hasAttrib = false;
 
 				for (i=0; attr && i<attr.length; i++) {
-					if (attr[i].specified) {
-						if (attr[i].name === 'style') {
-							props.style = elem.style.cssText || attr[i].value;
-						} else if ('string' === typeof attr[i].value) {
-							props[attr[i].name] = attr[i].value;
+					if (item(attr,i).specified) {
+						if (item(attr,i).name === 'style') {
+							props.style = elem.style.cssText || item(attr,i).value;
+						} else if ('string' === typeof item(attr,i).value ||
+                            (isRhino && (attr.item(i).value instanceof Packages.java.lang.String))) {
+							props[item(attr,i).name] = item(attr,i).value;
 						}
 						hasAttrib = true;
 					}

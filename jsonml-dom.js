@@ -217,3 +217,8 @@ var JsonML = JsonML || {};
 	};
 
 })(JsonML);
+
+//commonjs supprt
+if(typeof module !== undefined && module.exports){
+    module.exports = JsonML;
+}

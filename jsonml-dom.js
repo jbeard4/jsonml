@@ -50,7 +50,7 @@ var JsonML = JsonML || {};
 			case 1:  // element
 			case 9:  // document
 			case 11: // documentFragment
-				jml = [elem.tagName||''];
+				jml = [elem.localName||''];
 
 				var attr = elem.attributes,
 					props = {},

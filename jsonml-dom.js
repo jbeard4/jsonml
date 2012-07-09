@@ -50,7 +50,7 @@ var JsonML = JsonML || {};
 			case 1:  // element
 			case 9:  // document
 			case 11: // documentFragment
-				jml = [elem.localName||''];
+				jml = [(isRhino ? String(elem.localName) : elem.localName) ||''];
 
 				var attr = elem.attributes,
 					props = {},
@@ -60,10 +60,11 @@ var JsonML = JsonML || {};
 					if (item(attr,i).specified) {
 						if (item(attr,i).name === 'style') {
 							props.style = elem.style.cssText || item(attr,i).value;
-						} else if ('string' === typeof item(attr,i).value ||
-                            (isRhino && (attr.item(i).value instanceof Packages.java.lang.String))) {
+						} else if ('string' === typeof item(attr,i).value){
 							props[item(attr,i).name] = item(attr,i).value;
-						}
+						}else if(isRhino && (attr.item(i).value instanceof Packages.java.lang.String)){
+							props[item(attr,i).name] = String(item(attr,i).value);
+                        }
 						hasAttrib = true;
 					}
 				}

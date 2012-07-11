@@ -14,16 +14,13 @@ var JsonML = JsonML || {};
 (function(JsonML){
 	'use strict';
 
-    //small compatibility layer for rhino
-    var isRhino = typeof Packages !== "undefined";
+    function getItem(nodeList,index){
+        return nodeList.item ? nodeList.item(index) : nodeList[index];
+    } 
 
-    var item = isRhino ? 
-        function(nodeList,index){
-            return nodeList.item(index);
-        } : 
-        function(nodeList,index){
-            return nodeList[index];
-        };
+    function toStr(s){
+        return typeof s !== "string" ? String(s) : s;
+    }
 
 	/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
 		if (!elem || !elem.nodeType) {
@@ -34,7 +31,7 @@ var JsonML = JsonML || {};
 		function addChildren(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
 			if (elem.hasChildNodes()) {
 				for (var i=0; i<elem.childNodes.length; i++) {
-					var child = item(elem.childNodes,i);
+					var child = getItem(elem.childNodes,i);
 					child = JsonML.parseDOM(child, filter);
 					if (child) {
 						jml.push(child);
@@ -50,20 +47,20 @@ var JsonML = JsonML || {};
 			case 1:  // element
 			case 9:  // document
 			case 11: // documentFragment
-				jml = [(isRhino ? String(elem.localName) : elem.localName) ||''];
+				jml = [toStr(elem.localName) ||''];
 
 				var attr = elem.attributes,
 					props = {},
 					hasAttrib = false;
 
 				for (i=0; attr && i<attr.length; i++) {
-					if (item(attr,i).specified) {
-						if (item(attr,i).name === 'style') {
-							props.style = elem.style.cssText || item(attr,i).value;
-						} else if ('string' === typeof item(attr,i).value){
-							props[item(attr,i).name] = item(attr,i).value;
-						}else if(isRhino && (attr.item(i).value instanceof Packages.java.lang.String)){
-							props[item(attr,i).name] = String(item(attr,i).value);
+                    var a = getItem(attr,i);
+					if (a.specified) {
+						if (a.name === 'style') {
+							props.style = elem.style.cssText || a.value;
+						} else { 
+                            //assume string
+							props[a.name] = toStr(a.value);
                         }
 						hasAttrib = true;
 					}
